@@ -127,6 +127,7 @@ const spec : any =  {
 
     const result = embed(vis, spec);
 
+    // line graph
     result.then((embedResult) => {
 
       var rectx = 0;
@@ -159,7 +160,85 @@ const spec : any =  {
         textElement = document.createElementNS(svgNamespace, 'text');
       };
 
-      console.log(embedResult.view.data('marks')[0].datum.price);
+      // console.log(embedResult.view.data('marks')[0].datum.price);
+      console.log(embedResult.view.data('marks')[0]);
+
+      // stacked bar graph
+      // result.then((embedResult) => {
+
+      //   console.log(embedResult.view.data('marks')[0].datum);
+
+      //   var rectx = 0;
+      //   var recty = 0;
+      
+      //   const data = embedResult.view.data('marks')
+      //   var svgRect = document.getElementById("rects");
+      //   const svgNamespace = 'http://www.w3.org/2000/svg';
+      //   let rectElement = document.createElementNS(svgNamespace, 'rect');
+      //   let textElement = document.createElementNS(svgNamespace, 'text');
+
+      //   let question = embedResult.view.data('marks')[0].datum.question;
+      //   let type = embedResult.view.data('marks')[0].datum.type;
+      //   let i = 0;
+      //   let stop = true;
+  
+      //   while (stop) {
+
+      //     console.log(rectElement, (recty + i));
+      //     let datum = embedResult.view.data('marks')[i].datum;
+
+      //     rectElement.setAttribute('x', (rectx).toString());
+      //     rectElement.setAttribute('y', (recty + 6*i).toString());
+      //     rectElement.setAttribute('width', '50');
+      //     rectElement.setAttribute('height', '5');
+      //     rectElement.setAttribute('fill', 'grey');
+
+      //     textElement.setAttribute('x', (rectx + 10).toString());
+      //     textElement.setAttribute('y', (recty + 6*i + 3).toString());
+      //     textElement.setAttribute('font-size', '2');
+
+      //     textElement.textContent = 'Stack: ' + question.toString();
+
+      //     if(question != datum.question) {
+      //       console.log(question, datum.question)
+      //       question = datum.question
+
+      //       textElement.textContent = 'Stack: ' + question.toString();
+
+      //       svgRect?.appendChild(rectElement);
+      //       svgRect?.appendChild(textElement);
+
+      //       rectElement = document.createElementNS(svgNamespace, 'rect');
+      //       textElement = document.createElementNS(svgNamespace, 'text');
+      //     }
+
+      //     else if(type != datum.type) {
+      //       type = embedResult.view.data('marks')[0].datum.type
+      //     }
+          
+      //     else {
+      //       rectElement.setAttribute('x', (rectx).toString());
+      //       rectElement.setAttribute('y', (recty + 6*i).toString());
+      //       rectElement.setAttribute('width', '50');
+      //       rectElement.setAttribute('height', '5');
+      //       rectElement.setAttribute('fill', 'grey');
+    
+      //       textElement.setAttribute('x', (rectx + 10).toString());
+      //       textElement.setAttribute('y', (recty + 6*i + 3).toString());
+      //       textElement.setAttribute('font-size', '2');
+      //       textElement.setAttribute('fill', 'white');
+
+      //       i += 1;
+      //     }
+      
+      //     // textElement.textContent = 'Datum ' + i.toString() + ': ' + embedResult.view.data('marks')[i].datum.type.toString();
+  
+      //     svgRect?.appendChild(rectElement);
+      //     svgRect?.appendChild(textElement);
+
+      //     rectElement = document.createElementNS(svgNamespace, 'rect');
+      //     textElement = document.createElementNS(svgNamespace, 'text');
+      //   };
     });
 
   });
@@ -169,14 +248,14 @@ const spec : any =  {
       <header class={styles.header}>
       
       <div>
-      <svg width="1000" height="1000">
-        <svg id="rects" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <svg width="1000" height="1500">
+        <svg id="rects" viewBox="0 0 100 500" xmlns="http://www.w3.org/2000/svg">
         <text id="texts" x="260" y="20" font-size="20" fill="white"></text>
         </svg>
       </svg>
-      </div>
-
       <div ref={vis}></div>
+
+      </div>
       </header>
     </div>
   );
