@@ -145,12 +145,12 @@ const App: Component = () => {
     //     rectElement.setAttribute('y', (recty + 6*i).toString());
     //     rectElement.setAttribute('width', '50');
     //     rectElement.setAttribute('height', '5');
-    //     rectElement.setAttribute('fill', 'grey');
+    //     rectElement.setAttribute('fill', '#D9D9D9');
 
     //     textElement.setAttribute('x', (rectx + 10).toString());
     //     textElement.setAttribute('y', (recty + 6*i + 3).toString());
     //     textElement.setAttribute('font-size', '2');
-    //     textElement.setAttribute('fill', 'white');
+    //     textElement.setAttribute('fill', 'black');
         
     //     textElement.textContent = 'Datum ' + i.toString() + ': ' + embedResult.view.data('marks')[i].datum.price.toString();
 
@@ -195,7 +195,7 @@ const App: Component = () => {
             stackElement.setAttribute('y', (recty + 6).toString());
             stackElement.setAttribute('width', '60');
             stackElement.setAttribute('height', '5');
-            stackElement.setAttribute('fill', 'grey');
+            stackElement.setAttribute('fill', '#D9D9D9');
 
             textElement.setAttribute('x', (rectx + 40).toString());
             textElement.setAttribute('y', (recty + 9).toString());
@@ -219,7 +219,7 @@ const App: Component = () => {
             barElement.setAttribute('y', (recty + 6).toString());
             barElement.setAttribute('width', '50');
             barElement.setAttribute('height', '5');
-            barElement.setAttribute('fill', 'grey');
+            barElement.setAttribute('fill', '#D9D9D9');
 
             textElement.setAttribute('x', (rectx + 30).toString());
             textElement.setAttribute('y', (recty + 9).toString());
@@ -240,7 +240,7 @@ const App: Component = () => {
           dataElement.setAttribute('y', (recty + 8).toString());
           dataElement.setAttribute('width', '40');
           dataElement.setAttribute('height', '5');
-          dataElement.setAttribute('fill', 'grey');
+          dataElement.setAttribute('fill', '#D9D9D9');
   
           textElement.setAttribute('x', (rectx + 45).toString());
           textElement.setAttribute('y', (recty + 11).toString());
