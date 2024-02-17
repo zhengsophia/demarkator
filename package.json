@@ -8,6 +8,8 @@
     "build": "vite build",
     "serve": "vite preview"
   },
+  "module": "src/TreeView.jsx",
+  "author": "milahu",
   "license": "MIT",
   "devDependencies": {
     "solid-devtools": "^0.27.3",
@@ -17,6 +19,7 @@
   },
   "dependencies": {
     "solid-js": "^1.7.6",
+    "solid-styled-components": "^0.28.5",
     "vega-embed": "^6.23.0"
   }
 }

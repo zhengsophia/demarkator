@@ -1,0 +1,34 @@
+{
+  "name": "solidjs-treeview-component",
+  "version": "0.0.1",
+  "description": "TreeView component for SolidJS",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "module": "src/TreeView.jsx",
+  "author": "milahu",
+  "license": "CC0-1.0",
+  "dependencies": {
+    "solid-styled-components": "*"
+  },
+  "devDependencies": {
+    "solid-js": "*",
+    "vite": "*",
+    "vite-plugin-solid": "*"
+  },
+  "keywords": [
+    "solid",
+    "solid-js",
+    "solidjs",
+    "component",
+    "treeview",
+    "tree",
+    "file-browser",
+    "file-explorer",
+    "file-manager"
+  ],
+  "homepage": "https://github.com/milahu/solidjs-treeview-component",
+  "repository": { "type": "git", "url": "https://github.com/milahu/solidjs-treeview-component.git" },
+  "bugs": "https://github.com/milahu/solidjs-treeview-component/issues"
+}

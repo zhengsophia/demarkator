@@ -4,6 +4,8 @@ import { onMount } from 'solid-js';
 import styles from './App.module.css';
 import LineChart from './ExampleComponents/LineChart';
 import StackedBar from './ExampleComponents/StackedBar';
+// @ts-ignore
+import TreeDiagram from "./TreeComponent/TreeDiagram.jsx";
 
 const App: Component = () => {
 
@@ -13,6 +15,7 @@ const App: Component = () => {
       
       <div class={styles.box}>
           <StackedBar></StackedBar>
+          <TreeDiagram></TreeDiagram>
           {/* <LineChart></LineChart> */}
       </div>
       </header>
