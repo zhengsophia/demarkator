@@ -16,6 +16,7 @@ const LineChart: Component = () => {
       var recty = 0;
 
       const data = embedResult.view.data("marks");
+      console.log('mark data',data);
       var svgRect = document.getElementById("rects");
       const svgNamespace = "http://www.w3.org/2000/svg";
       let rectElement = document.createElementNS(svgNamespace, "rect");

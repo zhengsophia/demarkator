@@ -86,6 +86,9 @@ const TreeDiagram = () => {
       keyPath.push(childNodesIdx); parentDir = parentDir[childNodesIdx];
     });
 
+    //console.dir({ prefix, keyPath, val: state(...keyPath) })
+    //console.dir({ prefix, keyPath, parentDir })
+
     if (parentDir.length > 0) {
       console.log(`already loaded path "${path}"`);
       return; // already loaded
@@ -118,11 +121,8 @@ const TreeDiagram = () => {
     }
 
     // add new files to the app state
-    if (!state.fileList || state.fileList.length == 0) {
-      console.log(responseData.files);
+    if (!state.fileList || state.fileList.length == 0)
       setState('fileList', responseData.files); // init
-      console.log(state.fileList);
-    }
     else {
       //console.log(`add files for path ${path}`)
       setState(...keyPath, responseData.files);
@@ -218,4 +218,4 @@ const TreeDiagram = () => {
   );
 }
 
-export default TreeDiagram;
+export default TDoriginal;

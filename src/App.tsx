@@ -5,7 +5,8 @@ import styles from './App.module.css';
 import LineChart from './ExampleComponents/LineChart';
 import StackedBar from './ExampleComponents/StackedBar';
 // @ts-ignore
-import TreeDiagram from "./TreeComponent/TreeDiagram.jsx";
+// import TreeDiagram from "./TreeComponent/TreeDiagram.jsx";
+import TreeDiagram from "./ExampleComponents/TreeDiagram.tsx";
 
 const App: Component = () => {
 
