@@ -19,8 +19,8 @@
 
 .box {
   display: flex;
-  padding-top: 1000px;
-  padding-right: 100px;
+  padding-top: 80px;
+  padding-right: 80px;
 }
 
 @keyframes logo-spin {

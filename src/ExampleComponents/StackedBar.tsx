@@ -1,12 +1,12 @@
 import type { Component } from "solid-js";
-import { Show, createSignal } from 'solid-js';
+import { Show, createSignal } from "solid-js";
 
 import embed from "vega-embed";
 import { onMount } from "solid-js";
 import styles from "./App.module.css";
 import spec from "./StackedBar.json";
 import { stratify } from "d3-hierarchy";
-import TreeDiagram from './TreeDiagram'
+import TreeDiagram from "./TreeDiagram";
 
 function processStackedBarDataMarks(data: any) {
   const internalDataModel = [];
@@ -145,7 +145,6 @@ const StackedBar: Component = () => {
 
   const [hierarchy, setHierarchy] = createSignal(false);
 
-
   onMount(() => {
     //@ts-ignore
     const result = embed(vis, spec);
@@ -159,7 +158,7 @@ const StackedBar: Component = () => {
       const data = embedResult.view.data("marks");
 
       //@ts-ignore
-      setHierarchy((processStackedBarDataMarks(data)));
+      setHierarchy(processStackedBarDataMarks(data));
 
       console.log("hierarchy", hierarchy);
     });
@@ -167,24 +166,11 @@ const StackedBar: Component = () => {
 
   return (
     <div>
-      <svg width="500" height="8000">
-        <svg
-          id="rects"
-          viewBox="0 0 100 100"
-          xmlns="http://www.w3.org/2000/svg"
-        ></svg>
-      </svg>
-
       <div ref={vis}></div>
 
-      <Show
-      when={!!hierarchy}
-      fallback={<div>calculating hiearchy</div>}
-    >
-      <TreeDiagram hierarchy={hierarchy}></TreeDiagram>
-    </Show>
-
-      
+      <Show when={!!hierarchy()} fallback={<div>calculating hiearchy</div>}>
+        <TreeDiagram hierarchy={hierarchy}></TreeDiagram>
+      </Show>
     </div>
   );
 };
