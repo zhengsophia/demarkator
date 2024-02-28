@@ -35,7 +35,7 @@ const TreeDiagram = (props: any) => {
             // begin recursion to display elements
             <NodeElementRecursive
               node={node}
-              collapsedStore={collapsedStore()}
+              collapsedStore={collapsedStore}
               setCollapsedStore={setCollapsedStore}
               i={i}
               level={0}
@@ -84,6 +84,8 @@ const NodeElementRecursive = (props: any) => {
                 i={i()}
                 level={level + 1}
                 counter={counter}
+                collapsedStore={collapsedStore}
+                setCollapsedStore={setCollapsedStore}
               />
             );
           }}
