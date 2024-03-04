@@ -23,6 +23,7 @@ const TreeDiagram = (props: any) => {
   createEffect(() => {
     const newYPositions = calculateYHeightForHierarchy(
       hierarchy(),
+      collapsedStore(),
       nodeHeight()
     );
     console.log("new ypositions", newYPositions);
@@ -77,14 +78,27 @@ const TreeDiagram = (props: any) => {
   );
 };
 
-function calculateYHeightForHierarchy(hierarchy: any, nodeHeight: number) {
+function calculateYHeightForHierarchy(hierarchy: any, collapsedStore:Record<string,boolean>, nodeHeight: number) {
   const yPositions: any = {};
 
   const flatTree = flattenHierarchy(hierarchy);
   let currentNodePosition = 30;
 
+  const allCollapsedNodes:any = {}
+
   flatTree.forEach((node) => {
-    currentNodePosition += nodeHeight;
+    if(collapsedStore[node.id] || allCollapsedNodes[node.id]){
+      const children = flatTree.filter(currentNode=>currentNode.parentId == node.id)
+      children.forEach(child=>{
+        allCollapsedNodes[child.id] = true;
+      })
+      
+    }
+    
+    if(!allCollapsedNodes[node.id]){ // based on parent
+      currentNodePosition += nodeHeight;
+    }
+    
     yPositions[node.id] = currentNodePosition;
   });
 
@@ -99,7 +113,6 @@ const NodeElementRecursive = (props: any) => {
   let { node, i, level, collapsedStore, setCollapsedStore } = props;
   // Function to toggle collapsed state and reset counter
   const toggleCollapse = () => {
-    counter = 1;
     // copies the collapsedStore
     const clone = Object.assign({}, collapsedStore());
     clone[nodeId] = !clone[nodeId];
@@ -110,7 +123,7 @@ const NodeElementRecursive = (props: any) => {
   return (
     <g>
       <g onClick={() => toggleCollapse()}>
-        <NodeElement {...props} counter={counter++} />
+        <NodeElement {...props}  />
       </g>
 
       <Show
@@ -139,7 +152,7 @@ const NodeElementRecursive = (props: any) => {
 
 // presentational component -> generate the rectangles based on its properties
 const NodeElement = (props: any) => {
-  const { node, level, counter, yPositions } = props;
+  const { node, level, yPositions } = props;
 
   const levelOffset = level * 30;
   const xPosition = 20 + levelOffset;
