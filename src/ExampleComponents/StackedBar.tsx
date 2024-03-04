@@ -16,7 +16,6 @@ function processStackedBarDataMarks(data: any) {
 
   // process mark data into a tree model
 
-  console.log("mark data", data);
 
   var svgRect = document.getElementById("rects");
   const svgNamespace = "http://www.w3.org/2000/svg";
@@ -32,7 +31,6 @@ function processStackedBarDataMarks(data: any) {
     let datum = data[i].datum;
 
     if (question != datum.question || i == 0) {
-      console.log(question, datum.question);
       question = datum.question;
 
       const node = {
@@ -135,7 +133,6 @@ function processStackedBarDataMarks(data: any) {
     // dataElement = document.createElementNS(svgNamespace, "rect");
     // textElement = document.createElementNS(svgNamespace, "text");
   }
-  console.log("internal data model", internalDataModel);
 
   return stratify()(internalDataModel);
 }
@@ -150,7 +147,6 @@ const StackedBar: Component = () => {
     const result = embed(vis, spec);
 
     result.then((embedResult) => {
-      console.log(embedResult.view.data("marks"));
 
       let rectx = 0;
       let recty = 0;
@@ -160,7 +156,6 @@ const StackedBar: Component = () => {
       //@ts-ignore
       setHierarchy(processStackedBarDataMarks(data));
 
-      console.log("hierarchy", hierarchy);
     });
   });
 

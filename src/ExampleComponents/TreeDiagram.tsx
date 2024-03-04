@@ -1,15 +1,10 @@
 import { HierarchyNode } from "d3-hierarchy";
-import { For, Show, createSignal } from "solid-js";
-
-// counter to keep track of each rectangle rendered
-// 1. If you do counter + 1 instead of counter++;
-// 2.
+import { For, Show, createSignal, createEffect } from "solid-js";
+import { flattenHierarchy } from "./utils";
 
 let counter = 0;
 
 const TreeDiagram = (props: any) => {
-  console.log("props", props);
-
   const { hierarchy } = props;
 
   // for each node have a state for "collapsed/not"
@@ -21,51 +16,97 @@ const TreeDiagram = (props: any) => {
     return <div></div>;
   }
 
-  console.log(hierarchy);
-
   const [collapsedStore, setCollapsedStore] = createSignal({});
+  const [nodeHeight, setNodeHeight] = createSignal(50);
+  const [yPositions, setYPositions] = createSignal(null);
 
-  console.log("hie", hierarchy());
+  createEffect(() => {
+    const newYPositions = calculateYHeightForHierarchy(
+      hierarchy(),
+      nodeHeight()
+    );
+    console.log("new ypositions", newYPositions);
+
+    setYPositions(newYPositions);
+  });
 
   return (
-    <svg width={1000} height={8000}>
-      <For each={hierarchy()?.children}>
-        {(node, i) => {
-          return (
-            // begin recursion to display elements
-            <NodeElementRecursive
-              node={node}
-              collapsedStore={collapsedStore}
-              setCollapsedStore={setCollapsedStore}
-              i={i}
-              level={0}
-              counter={counter}
-            />
-          );
+    <div>
+      {/*
+      code for demonstration of nodeHeight changes
+      <select
+        value={20}
+        onChange={(event) => {
+          let selectElement = event.target;
+
+          let value = selectElement.value;
+
+          console.log("on change", event,value);
+          console.log("running callback for select");
+          //@ts-ignore
+          setNodeHeight(parseInt(value));
         }}
-      </For>
-    </svg>
+      >
+        <option value={40} label="40"></option>
+        <option value={60} label="60"></option>
+        <option value={80} label="80"></option>
+        <option value={100} label="100"></option>
+      </select>*/}
+
+      <Show when={yPositions()} fallback={<div></div>}>
+        <svg width={1000} height={8000}>
+          <For each={hierarchy()?.children}>
+            {(node, i) => {
+              return (
+                // begin recursion to display elements
+                <NodeElementRecursive
+                  node={node}
+                  yPositions={yPositions}
+                  collapsedStore={collapsedStore}
+                  setCollapsedStore={setCollapsedStore}
+                  i={i}
+                  level={0}
+                  counter={counter}
+                />
+              );
+            }}
+          </For>
+        </svg>
+      </Show>
+    </div>
   );
 };
+
+function calculateYHeightForHierarchy(hierarchy: any, nodeHeight: number) {
+  const yPositions: any = {};
+
+  const flatTree = flattenHierarchy(hierarchy);
+  let currentNodePosition = 30;
+
+  flatTree.forEach((node) => {
+    currentNodePosition += nodeHeight;
+    yPositions[node.id] = currentNodePosition;
+  });
+
+  return yPositions;
+}
 
 // functional component -> recurse through every child of the current node
 const NodeElementRecursive = (props: any) => {
   const nodeId = props.node.data.id;
+  const yPositions = props.yPositions;
 
   let { node, i, level, collapsedStore, setCollapsedStore } = props;
   // Function to toggle collapsed state and reset counter
   const toggleCollapse = () => {
-    console.log("clicked!", props);
-    counter = 0; // Reset counter on first click
+    counter = 1;
     // copies the collapsedStore
     const clone = Object.assign({}, collapsedStore());
     clone[nodeId] = !clone[nodeId];
 
-    console.log("clone", clone);
     setCollapsedStore(clone);
   };
 
-  console.log("collapsed", collapsedStore);
   return (
     <g>
       <g onClick={() => toggleCollapse()}>
@@ -86,6 +127,7 @@ const NodeElementRecursive = (props: any) => {
                 counter={counter}
                 collapsedStore={collapsedStore}
                 setCollapsedStore={setCollapsedStore}
+                yPositions={yPositions}
               />
             );
           }}
@@ -97,8 +139,7 @@ const NodeElementRecursive = (props: any) => {
 
 // presentational component -> generate the rectangles based on its properties
 const NodeElement = (props: any) => {
-  const { node, i, level } = props;
-  //   console.log('visitng node',node.data.name,'counter',counter,'i',i)
+  const { node, level, counter, yPositions } = props;
 
   const levelOffset = level * 30;
   const xPosition = 20 + levelOffset;
@@ -111,14 +152,14 @@ const NodeElement = (props: any) => {
     <g>
       <rect
         x={xPosition}
-        y={yIncrement * counter}
+        y={yPositions()[node.data.id]}
         width={rectWidth}
         height={40}
         fill="orange"
       ></rect>
       <text
         x={xPosition + xTextOffset}
-        y={yIncrement * counter + yTextOffset}
+        y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
         alignment-baseline={"bottom"}
         color="black"
