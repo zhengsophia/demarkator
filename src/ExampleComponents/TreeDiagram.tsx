@@ -1,6 +1,7 @@
 import { HierarchyNode } from "d3-hierarchy";
 import { For, Show, createSignal, createEffect } from "solid-js";
 import { flattenHierarchy } from "./utils";
+import styles from './App.module.css';
 
 let counter = 0;
 
@@ -55,7 +56,7 @@ const TreeDiagram = (props: any) => {
       </select>*/}
 
       <Show when={yPositions()} fallback={<div></div>}>
-        <svg width={1000} height={8000}>
+        <svg width={500} height={8000}>
           <For each={hierarchy()?.children}>
             {(node, i) => {
               return (
@@ -92,7 +93,6 @@ function calculateYHeightForHierarchy(hierarchy: any, collapsedStore:Record<stri
       children.forEach(child=>{
         allCollapsedNodes[child.id] = true;
       })
-      
     }
     
     if(!allCollapsedNodes[node.id]){ // based on parent
@@ -109,29 +109,31 @@ function calculateYHeightForHierarchy(hierarchy: any, collapsedStore:Record<stri
 const NodeElementRecursive = (props: any) => {
   const nodeId = props.node.data.id;
   const yPositions = props.yPositions;
+  
 
-  let { node, i, level, collapsedStore, setCollapsedStore } = props;
+  let { node, i, level, collapsedStore, setCollapsedStore } = props; // include toggleCollapse from props
   // Function to toggle collapsed state and reset counter
   const toggleCollapse = () => {
     // copies the collapsedStore
     const clone = Object.assign({}, collapsedStore());
+    // console.log('clone', clone)
     clone[nodeId] = !clone[nodeId];
-
     setCollapsedStore(clone);
+    console.log(collapsedStore()) 
   };
 
   return (
     <g>
       <g onClick={() => toggleCollapse()}>
-        <NodeElement {...props}  />
+        <NodeElement {...props}   />
       </g>
 
       <Show
         when={node.children && !collapsedStore()?.[nodeId]}
-        fallback={<g></g>}
-      >
+        fallback={<g></g>} >
         <For each={node.children}>
           {(childNode, i) => {
+            // { console.log(collapsedStore()?.[nodeId]) }
             return (
               <NodeElementRecursive
                 node={childNode}
@@ -152,7 +154,8 @@ const NodeElementRecursive = (props: any) => {
 
 // presentational component -> generate the rectangles based on its properties
 const NodeElement = (props: any) => {
-  const { node, level, yPositions } = props;
+  const { node, level, yPositions, collapsedStore } = props;
+  const nodeId = props.node.data.id;
 
   const levelOffset = level * 30;
   const xPosition = 20 + levelOffset;
@@ -168,16 +171,19 @@ const NodeElement = (props: any) => {
         y={yPositions()[node.data.id]}
         width={rectWidth}
         height={40}
-        fill="orange"
+        fill="rgba(0, 0, 0, 0)"
       ></rect>
-      <text
+        <text
         x={xPosition + xTextOffset}
         y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
         alignment-baseline={"bottom"}
-        color="black"
+        fill="white"
+        font-family="Gill Sans"
       >
-        {node.data.name}
+        {/* {console.log('toggle', collapsedStore())} */}
+        { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : {} } 
+        { node.data.name }
       </text>
     </g>
   );
