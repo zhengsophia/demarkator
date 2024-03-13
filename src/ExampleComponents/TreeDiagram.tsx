@@ -181,7 +181,6 @@ const NodeElement = (props: any) => {
         fill="white"
         font-family="Gill Sans"
       >
-        {/* {console.log('toggle', collapsedStore())} */}
         { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : {} } 
         { node.data.name }
       </text>

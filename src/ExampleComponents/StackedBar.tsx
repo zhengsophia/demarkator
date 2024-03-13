@@ -16,7 +16,6 @@ function processStackedBarDataMarks(data: any) {
 
   // process mark data into a tree model
 
-
   var svgRect = document.getElementById("rects");
   const svgNamespace = "http://www.w3.org/2000/svg";
   let barElement = document.createElementNS(svgNamespace, "rect");
@@ -142,30 +141,69 @@ const StackedBar: Component = () => {
 
   const [hierarchy, setHierarchy] = createSignal(false);
 
-  onMount(() => {
+  onMount(async () => {
     //@ts-ignore
-    const result = embed(vis, spec);
+    const result = embed(vis, spec, { actions: false });
 
-    result.then((embedResult) => {
+    console.log('Component mounted. Sleeping for 5 seconds...');
 
+    // Sleep for 5 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    console.log('5 seconds passed. Continuing with component logic...');
+
+
+    result.then(function (embedResult: any) {
+      //
       let rectx = 0;
       let recty = 0;
 
       const data = embedResult.view.data("marks");
 
+      console.log("vega view", embedResult.view);
+
+      function onItemDataChange(name: any, item: any) {
+        console.log("in item data change");
+        console.log("Item change changed. name:", name, "item:", item);
+      }
+
+      function onItemDataChangeOne(name: any) {
+        console.log("name", name, "item not ");
+      }
+
+      // Assuming your Vega view instance is stored in a variable named `view`
+      const newResult = embedResult.view.addSignalListener(
+        "cell",
+        onItemDataChange
+      );
+      console.log("signal listener", newResult);
+
+      embedResult.view.runAsync();
+      // embedResult.view.runAsync();
+
+      // embedResult.view.signal('cell', '7');
+      // embedResult.view.runAsync();
+
+      //embedResult.view.runAsync();
+      console.log("init cell", embedResult.view.signal("cell"));
+
       //@ts-ignore
       setHierarchy(processStackedBarDataMarks(data));
-
     });
   });
 
   return (
     <div>
-      <div ref={vis}></div>
+      <div
+        ref={vis}
+        onClick={() => {
+          console.log("clicked vis div");
+        }}
+      ></div>
 
-      <Show when={!!hierarchy()} fallback={<div>calculating hiearchy</div>}>
+      {/*<Show when={!!hierarchy()} fallback={<div>calculating hierarchy</div>}>
         <TreeDiagram hierarchy={hierarchy}></TreeDiagram>
-      </Show>
+  </Show>*/}
     </div>
   );
 };
