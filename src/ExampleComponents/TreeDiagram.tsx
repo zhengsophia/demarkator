@@ -156,7 +156,7 @@ const NodeElement = (props: any) => {
         text-anchor="start"
         alignment-baseline={"bottom"}
         fill="black"
-        font-family="Gill Sans"
+        font-family="Inter Tight Light"
       >
         { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : {} } 
         { node.data.name }

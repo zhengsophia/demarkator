@@ -1,5 +1,16 @@
 .App {
   text-align: center;
+  font-family: "Inter Tight Light";
+}
+
+@font-face {
+  font-family: "Inter Tight Light";
+  src: url("https://db.onlinewebfonts.com/t/27aaab1afa5754562a9f25600cbf3db9.eot");
+  src: url("https://db.onlinewebfonts.com/t/27aaab1afa5754562a9f25600cbf3db9.eot?#iefix")format("embedded-opentype"),
+  url("https://db.onlinewebfonts.com/t/27aaab1afa5754562a9f25600cbf3db9.woff2")format("woff2"),
+  url("https://db.onlinewebfonts.com/t/27aaab1afa5754562a9f25600cbf3db9.woff")format("woff"),
+  url("https://db.onlinewebfonts.com/t/27aaab1afa5754562a9f25600cbf3db9.ttf")format("truetype"),
+  url("https://db.onlinewebfonts.com/t/27aaab1afa5754562a9f25600cbf3db9.svg#Inter Tight Light")format("svg");
 }
 
 .header {
