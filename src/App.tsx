@@ -5,7 +5,7 @@ import styles from './App.module.css';
 import LineChart from './ExampleComponents/LineChart';
 import StackedBar from './ExampleComponents/StackedBar';
 //@ts-ignore
-import StackedBar2 from './ExampleComponents/StackedBar2';
+import StackedBar2 from './ExampleComponents/StackedBar2.jsx';
 
 // @ts-ignore
 // import TreeDiagram from "./TreeComponent/TreeDiagram.jsx";
@@ -16,12 +16,7 @@ const App: Component = () => {
   return (
     <div class={styles.App}>
       <header class={styles.header}>
-      
-      <div class={styles.box}>
-          <StackedBar2></StackedBar2>
-          {/* <LineChart></LineChart> */}
-          {/* <TreeDiagram></TreeDiagram> */}
-      </div>
+        <StackedBar></StackedBar>
       </header>
     </div>
   );

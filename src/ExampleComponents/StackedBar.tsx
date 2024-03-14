@@ -3,7 +3,7 @@ import { Show, createSignal } from "solid-js";
 
 import embed from "vega-embed";
 import { onMount } from "solid-js";
-import styles from "./App.module.css";
+import styles from "../App.module.css";
 import spec from "./StackedBar.json";
 import { stratify } from "d3-hierarchy";
 import TreeDiagram from "./TreeDiagram";
@@ -145,12 +145,12 @@ const StackedBar: Component = () => {
     //@ts-ignore
     const result = embed(vis, spec, { actions: false });
 
-    console.log('Component mounted. Sleeping for 5 seconds...');
+    // console.log('Component mounted. Sleeping for 5 seconds...');
 
-    // Sleep for 5 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // // Sleep for 5 seconds
+    // await new Promise(resolve => setTimeout(resolve, 2000));
 
-    console.log('5 seconds passed. Continuing with component logic...');
+    // console.log('5 seconds passed. Continuing with component logic...');
 
 
     result.then(function (embedResult: any) {
@@ -193,17 +193,20 @@ const StackedBar: Component = () => {
   });
 
   return (
-    <div>
-      <div
+    <div class={styles.App}>
+      <div class={styles.container}>
+      <div class={styles.scrollContainerChild}>
+        <Show when={!!hierarchy()} fallback={<div>calculating hierarchy</div>}>
+          <TreeDiagram hierarchy={hierarchy}></TreeDiagram>
+        </Show>
+      </div>
+      <div class={styles.fixedContainerChild}
         ref={vis}
         onClick={() => {
           console.log("clicked vis div");
         }}
       ></div>
-
-      {/*<Show when={!!hierarchy()} fallback={<div>calculating hierarchy</div>}>
-        <TreeDiagram hierarchy={hierarchy}></TreeDiagram>
-  </Show>*/}
+    </div>
     </div>
   );
 };

@@ -33,29 +33,7 @@ const TreeDiagram = (props: any) => {
   });
 
   return (
-    <div>
-      {/*
-      code for demonstration of nodeHeight changes
-      <select
-        value={20}
-        onChange={(event) => {
-          let selectElement = event.target;
-
-          let value = selectElement.value;
-
-          console.log("on change", event,value);
-          console.log("running callback for select");
-          //@ts-ignore
-          setNodeHeight(parseInt(value));
-        }}
-      >
-        <option value={40} label="40"></option>
-        <option value={60} label="60"></option>
-        <option value={80} label="80"></option>
-        <option value={100} label="100"></option>
-      </select>*/}
-
-      <Show when={yPositions()} fallback={<div></div>}>
+    <Show when={yPositions()} fallback={<div></div>}>
         <svg width={500} height={8000}>
           <For each={hierarchy()?.children}>
             {(node, i) => {
@@ -75,7 +53,6 @@ const TreeDiagram = (props: any) => {
           </For>
         </svg>
       </Show>
-    </div>
   );
 };
 
@@ -83,7 +60,7 @@ function calculateYHeightForHierarchy(hierarchy: any, collapsedStore:Record<stri
   const yPositions: any = {};
 
   const flatTree = flattenHierarchy(hierarchy);
-  let currentNodePosition = 30;
+  let currentNodePosition = 0;
 
   const allCollapsedNodes:any = {}
 
@@ -178,7 +155,7 @@ const NodeElement = (props: any) => {
         y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
         alignment-baseline={"bottom"}
-        fill="white"
+        fill="black"
         font-family="Gill Sans"
       >
         { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : {} } 
