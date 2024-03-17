@@ -1,6 +1,5 @@
 import type { Component } from "solid-js";
 import { Show, createSignal } from "solid-js";
-
 import embed from "vega-embed";
 import { onMount } from "solid-js";
 import styles from "../App.module.css";

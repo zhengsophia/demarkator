@@ -17,6 +17,7 @@ const App: Component = () => {
     <div class={styles.App}>
       <header class={styles.header}>
         <StackedBar></StackedBar>
+        {/* <LineChart></LineChart> */}
       </header>
     </div>
   );
