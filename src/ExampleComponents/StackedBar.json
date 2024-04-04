@@ -302,11 +302,11 @@
       "on": [
           {
               "events": {"type":"mouseover", "source":"view","marktype":"rect"},
-              "update": "9"
+              "update": "item()"
           },
           {
               "events": {"type":"mouseout", "source":"view","marktype":"rect"},
-              "update": "5"
+              "update": "0"
           }
       ]
   }

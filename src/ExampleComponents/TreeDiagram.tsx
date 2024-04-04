@@ -6,20 +6,49 @@ import styles from './App.module.css';
 let counter = 0;
 
 const TreeDiagram = (props: any) => {
-  const { hierarchy } = props;
+  const { hierarchy, hoveredId } = props;
 
   // for each node have a state for "collapsed/not"
   // mutate that state for the on click
   // if node is collapsed, do not render any children elements
   // when click is first made, also set counter to 0
-
   if (!hierarchy) {
     return <div></div>;
   }
 
-  const [collapsedStore, setCollapsedStore] = createSignal({});
+  function createDefaultStore(hierarchy:any) {
+    const flatTree = flattenHierarchy(hierarchy);
+
+    const defaultCollapsedStore:any = {}
+
+    flatTree.forEach((node) => {
+      defaultCollapsedStore[node.id] = false
+      })
+
+    return defaultCollapsedStore;
+  }
+
+  const defaultCollapsedStore = createDefaultStore(hierarchy());
+
+
+  const [collapsedStore, setCollapsedStore] = createSignal(defaultCollapsedStore);
   const [nodeHeight, setNodeHeight] = createSignal(50);
   const [yPositions, setYPositions] = createSignal(null);
+
+  // createEffect(() => {
+  //   const hoveredCollapsedStore = {};
+  //   if (hoveredId != 0) {
+  //     for (const key in collapsedStore()) {
+  //       if (key == hoveredId) {
+  //         hoveredCollapsedStore[hoveredId] = false;
+  //       }
+  //       else {
+  //         hoveredCollapsedStore[key] = true;
+  //       }
+  //     }
+  //   }
+  //   setCollapsedStore(hoveredCollapsedStore);
+  // });
 
   createEffect(() => {
     const newYPositions = calculateYHeightForHierarchy(
@@ -47,6 +76,7 @@ const TreeDiagram = (props: any) => {
                   i={i}
                   level={0}
                   counter={counter}
+                  hoveredId={hoveredId}
                 />
               );
             }}
@@ -87,8 +117,7 @@ const NodeElementRecursive = (props: any) => {
   const nodeId = props.node.data.id;
   const yPositions = props.yPositions;
   
-
-  let { node, i, level, collapsedStore, setCollapsedStore } = props; // include toggleCollapse from props
+  let { node, i, level, collapsedStore, setCollapsedStore, hoveredId } = props; // include toggleCollapse from props
   // Function to toggle collapsed state and reset counter
   const toggleCollapse = () => {
     // copies the collapsedStore
@@ -96,7 +125,7 @@ const NodeElementRecursive = (props: any) => {
     // console.log('clone', clone)
     clone[nodeId] = !clone[nodeId];
     setCollapsedStore(clone);
-    console.log(collapsedStore()) 
+    console.log('collapsed store', collapsedStore()) 
   };
 
   return (
@@ -110,7 +139,6 @@ const NodeElementRecursive = (props: any) => {
         fallback={<g></g>} >
         <For each={node.children}>
           {(childNode, i) => {
-            // { console.log(collapsedStore()?.[nodeId]) }
             return (
               <NodeElementRecursive
                 node={childNode}
@@ -120,6 +148,7 @@ const NodeElementRecursive = (props: any) => {
                 collapsedStore={collapsedStore}
                 setCollapsedStore={setCollapsedStore}
                 yPositions={yPositions}
+                hoveredId={hoveredId}
               />
             );
           }}
@@ -131,8 +160,10 @@ const NodeElementRecursive = (props: any) => {
 
 // presentational component -> generate the rectangles based on its properties
 const NodeElement = (props: any) => {
-  const { node, level, yPositions, collapsedStore } = props;
+  const { node, level, yPositions, collapsedStore, hoveredId } = props;
   const nodeId = props.node.data.id;
+
+  // console.log(hoveredId);
 
   const levelOffset = level * 30;
   const xPosition = 20 + levelOffset;
@@ -142,7 +173,7 @@ const NodeElement = (props: any) => {
   const yTextOffset = yIncrement / 3;
 
   return (
-    <g>
+    <g id={nodeId}>
       <rect
         x={xPosition}
         y={yPositions()[node.data.id]}
@@ -158,7 +189,7 @@ const NodeElement = (props: any) => {
         fill="black"
         font-family="Inter Tight Light"
       >
-        { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : {} } 
+        { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : <g></g> } 
         { node.data.name }
       </text>
     </g>

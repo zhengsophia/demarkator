@@ -15,13 +15,6 @@ function processStackedBarDataMarks(data: any) {
 
   // process mark data into a tree model
 
-  var svgRect = document.getElementById("rects");
-  const svgNamespace = "http://www.w3.org/2000/svg";
-  let barElement = document.createElementNS(svgNamespace, "rect");
-  let stackElement = document.createElementNS(svgNamespace, "rect");
-  let dataElement = document.createElementNS(svgNamespace, "rect");
-  let textElement = document.createElementNS(svgNamespace, "text");
-
   let question = data[0].datum.question;
   let type = data[0].datum.type;
 
@@ -38,26 +31,6 @@ function processStackedBarDataMarks(data: any) {
       };
 
       internalDataModel.push(node);
-
-      // stackElement.setAttribute("x", (rectx + 20).toString());
-      // stackElement.setAttribute("y", (recty + 6).toString());
-      // stackElement.setAttribute("width", "60");
-      // stackElement.setAttribute("height", "5");
-      // stackElement.setAttribute("fill", "#D9D9D9");
-
-      // textElement.setAttribute("x", (rectx + 40).toString());
-      // textElement.setAttribute("y", (recty + 9).toString());
-      // textElement.setAttribute("font-size", "3");
-
-      // recty += 8;
-
-      // textElement.textContent = "Stack: " + question.toString();
-
-      // svgRect?.appendChild(stackElement);
-      // svgRect?.appendChild(textElement);
-
-      // stackElement = document.createElementNS(svgNamespace, "rect");
-      // textElement = document.createElementNS(svgNamespace, "text");
     }
 
     if (type != datum.type || i == 0) {
@@ -70,104 +43,74 @@ function processStackedBarDataMarks(data: any) {
       };
 
       internalDataModel.push(node);
-
-      // barElement.setAttribute("x", (rectx + 30).toString());
-      // barElement.setAttribute("y", (recty + 6).toString());
-      // barElement.setAttribute("width", "50");
-      // barElement.setAttribute("height", "5");
-      // barElement.setAttribute("fill", "#D9D9D9");
-
-      // textElement.setAttribute("x", (rectx + 30).toString());
-      // textElement.setAttribute("y", (recty + 9).toString());
-      // textElement.setAttribute("font-size", "3");
-
-      // recty += 8;
-
-      // textElement.textContent = "Bar: " + type.toString();
-
-      // svgRect?.appendChild(barElement);
-      // svgRect?.appendChild(textElement);
-
-      // barElement = document.createElementNS(svgNamespace, "rect");
-      // textElement = document.createElementNS(svgNamespace, "text");
     }
 
     const datumName =
       "Datum " +
       (i + 1).toString() +
       ": " +
-      data[i].datum.percentage.toString();
+      datum.percentage.toString();
     const parentName = question.toString() + "-" + type.toString();
     const node = {
       name: datumName,
       id: parentName + "-datum",
       parentId: parentName,
+      nodeData:datum
     };
 
     internalDataModel.push(node);
-
-    // dataElement.setAttribute("x", (rectx + 40).toString());
-    // dataElement.setAttribute("y", (recty + 8).toString());
-    // dataElement.setAttribute("width", "40");
-    // dataElement.setAttribute("height", "5");
-    // dataElement.setAttribute("fill", "#D9D9D9");
-
-    // textElement.setAttribute("x", (rectx + 45).toString());
-    // textElement.setAttribute("y", (recty + 11).toString());
-    // textElement.setAttribute("font-size", "3");
-    // textElement.setAttribute("fill", "black");
-
-    // recty += 10;
-
-    // textElement.textContent =
-    //   "Datum " +
-    //   (i + 1).toString() +
-    //   ": " +
-    //   data[i].datum.percentage.toString();
-
-    // svgRect?.appendChild(dataElement);
-    // svgRect?.appendChild(textElement);
-
-    // dataElement = document.createElementNS(svgNamespace, "rect");
-    // textElement = document.createElementNS(svgNamespace, "text");
   }
 
-  return stratify()(internalDataModel);
+
+
+  console.log('internal data model', internalDataModel)
+  const internalData =  stratify()(internalDataModel);
+  console.log('processed data', internalData)
+  return internalData
 }
 
 const StackedBar: Component = () => {
   let vis: any;
 
   const [hierarchy, setHierarchy] = createSignal(false);
+  const [hoveredId, setHoveredId] = createSignal(null);
 
   onMount(async () => {
     //@ts-ignore
-    const result = embed(vis, spec, { actions: false });
-
-    // console.log('Component mounted. Sleeping for 5 seconds...');
-
-    // // Sleep for 5 seconds
-    // await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // console.log('5 seconds passed. Continuing with component logic...');
-
+    const result = embed(vis, spec, { actions: false, renderer: "svg" });
 
     result.then(function (embedResult: any) {
-      //
-      let rectx = 0;
-      let recty = 0;
 
       const data = embedResult.view.data("marks");
 
-      console.log("vega view", embedResult.view);
+      console.log('mark data',data)
 
       function onItemDataChange(name: any, item: any) {
         console.log("in item data change");
         console.log("Item change changed. name:", name, "item:", item);
-      }
 
-      function onItemDataChangeOne(name: any) {
-        console.log("name", name, "item not ");
+        if (item != 0) {
+
+          // collapsed and grayed out if linked on 
+          // reconstruct the nodeid from the cell item 
+          // item will contain all node's data
+
+          // checking datum item and against which node data id's it matches
+          let question = item.datum.question;
+          let type = item.datum.type;
+          let itemId = question.toString() + "-" + type.toString() + "-datum";
+          setHoveredId(itemId);
+
+          // check if there is a match with ids, then when there's a match, 
+          // collapse all others and gray others out
+          // delegate checking logic inside TreeDiagram -> what's impt to transfer
+          // use signals to pass item() outside the scope of this function for currently hovered model
+          // hover first, don't worry about click    
+        }
+        else {
+          setHoveredId(null);
+        }
+        console.log(hoveredId());
       }
 
       // Assuming your Vega view instance is stored in a variable named `view`
@@ -175,16 +118,12 @@ const StackedBar: Component = () => {
         "cell",
         onItemDataChange
       );
+
       console.log("signal listener", newResult);
 
       embedResult.view.runAsync();
-      // embedResult.view.runAsync();
-
-      // embedResult.view.signal('cell', '7');
-      // embedResult.view.runAsync();
-
-      //embedResult.view.runAsync();
       console.log("init cell", embedResult.view.signal("cell"));
+      
 
       //@ts-ignore
       setHierarchy(processStackedBarDataMarks(data));
@@ -196,14 +135,11 @@ const StackedBar: Component = () => {
       <div class={styles.container}>
       <div class={styles.scrollContainerChild}>
         <Show when={!!hierarchy()} fallback={<div>calculating hierarchy</div>}>
-          <TreeDiagram hierarchy={hierarchy}></TreeDiagram>
+          <TreeDiagram hierarchy={hierarchy} hoveredId={hoveredId()}></TreeDiagram>
         </Show>
       </div>
       <div class={styles.fixedContainerChild}
         ref={vis}
-        onClick={() => {
-          console.log("clicked vis div");
-        }}
       ></div>
     </div>
     </div>
