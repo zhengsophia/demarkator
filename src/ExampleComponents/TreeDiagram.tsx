@@ -136,7 +136,7 @@ function calculateYHeightForHierarchy(
     if (!children) {
       return
     }
-    
+
     children.forEach((child) => {
       allCollapsedNodes[child.id] = true;
       collapseChildren(child.id); 
@@ -167,19 +167,12 @@ function calculateYHeightForHierarchy(
     console.log('parent node', findParentNode(node.parentId), node.id, node.children);
     let parentNode: any = findParentNode(node.parentId)
     if (parentNode) {
-      if (collapsedStore[node.id] && parentNode.id == 'topLevel') {
-        // const children = flatTree.filter(
-        //   (currentNode) => currentNode.parentId == node.id
-        // );
-        console.log('collapsed store', collapsedStore)
-        currentNodePosition += nodeHeight;
-      }
-      else if (!allCollapsedNodes[node.id]) {
-        console.log('all collapsed nodes', allCollapsedNodes)
+      if (!allCollapsedNodes[node.id]) {
+        // console.log('all collapsed nodes', allCollapsedNodes)
         // console.log('collapsed store', collapsedStore)
         // based on parent
         // console.log('debug', parentNode, allCollapsedNodes[parentNode.id])
-        console.log('click debug', collapsedStore[node.id], parentNode.id)
+        // console.log('click debug', collapsedStore[node.id], parentNode.id)
         currentNodePosition += nodeHeight;
       }
     }
