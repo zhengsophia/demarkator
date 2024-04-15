@@ -1,7 +1,7 @@
 import { HierarchyNode } from "d3-hierarchy";
 import { For, Show, createSignal, createEffect } from "solid-js";
 import { flattenHierarchy } from "./utils";
-import styles from './App.module.css';
+import styles from "./App.module.css";
 
 let counter = 0;
 
@@ -16,39 +16,68 @@ const TreeDiagram = (props: any) => {
     return <div></div>;
   }
 
-  function createDefaultStore(hierarchy:any) {
+  function createDefaultStore(hierarchy: any) {
     const flatTree = flattenHierarchy(hierarchy);
 
-    const defaultCollapsedStore:any = {}
+    const defaultCollapsedStore: any = {};
 
     flatTree.forEach((node) => {
-      defaultCollapsedStore[node.id] = false
-      })
+      defaultCollapsedStore[node.id] = false;
+    });
 
     return defaultCollapsedStore;
   }
 
   const defaultCollapsedStore = createDefaultStore(hierarchy());
 
-
-  const [collapsedStore, setCollapsedStore] = createSignal(defaultCollapsedStore);
+  // potentially change this to store
+  const [collapsedStore, setCollapsedStore] = createSignal(
+    defaultCollapsedStore
+  );
   const [nodeHeight, setNodeHeight] = createSignal(50);
   const [yPositions, setYPositions] = createSignal(null);
 
-  // createEffect(() => {
-  //   const hoveredCollapsedStore = {};
-  //   if (hoveredId != 0) {
-  //     for (const key in collapsedStore()) {
-  //       if (key == hoveredId) {
-  //         hoveredCollapsedStore[hoveredId] = false;
-  //       }
-  //       else {
-  //         hoveredCollapsedStore[key] = true;
-  //       }
-  //     }
-  //   }
-  //   setCollapsedStore(hoveredCollapsedStore);
-  // });
+  function isObjectEqual(obj1, obj2) {
+    const keys1 = Object.keys(obj1);
+
+    for (let key of keys1) {
+      if (obj1[key] != obj2[key]) return false;
+    }
+
+    const keys2 = Object.keys(obj2);
+    for (let key of keys2) {
+      if (obj1[key] != obj2[key]) return false;
+    }
+    return true;
+  }
+
+  createEffect(() => {
+
+    if(hoveredId()=='0') {
+      setCollapsedStore(defaultCollapsedStore);
+      return;
+    }
+
+    const hoveredCollapsedStore = {};
+    const previousCollapsedStore = collapsedStore();
+    
+    for (const key in previousCollapsedStore) {
+      // TODO: update this hacky fix to rely less on the string value itself
+      if (hoveredId().includes(key)) {
+        console.log("in dont collapse");
+        hoveredCollapsedStore[key] = false;
+      } else {
+        hoveredCollapsedStore[key] = true;
+      }
+    }
+
+    // do a deep equality check between hoveredCollapsedStore,collapsedStore()
+    if (!isObjectEqual(previousCollapsedStore, hoveredCollapsedStore)) {
+      setCollapsedStore(hoveredCollapsedStore);
+    }
+ 
+    console.log('hovered collapse', hoveredCollapsedStore)
+  });
 
   createEffect(() => {
     const newYPositions = calculateYHeightForHierarchy(
@@ -63,60 +92,109 @@ const TreeDiagram = (props: any) => {
 
   return (
     <Show when={yPositions()} fallback={<div></div>}>
-        <svg width={500} height={8000}>
-          <For each={hierarchy()?.children}>
-            {(node, i) => {
-              return (
-                // begin recursion to display elements
-                <NodeElementRecursive
-                  node={node}
-                  yPositions={yPositions}
-                  collapsedStore={collapsedStore}
-                  setCollapsedStore={setCollapsedStore}
-                  i={i}
-                  level={0}
-                  counter={counter}
-                  hoveredId={hoveredId}
-                />
-              );
-            }}
-          </For>
-        </svg>
-      </Show>
+      <svg width={500} height={8000}>
+        <For each={hierarchy()?.children}>
+          {(node, i) => {
+            return (
+              // begin recursion to display elements
+              <NodeElementRecursive
+                node={node}
+                yPositions={yPositions}
+                collapsedStore={collapsedStore}
+                setCollapsedStore={setCollapsedStore}
+                i={i}
+                level={0}
+                counter={counter}
+                hoveredId={hoveredId}
+              />
+            );
+          }}
+        </For>
+      </svg>
+    </Show>
   );
 };
 
-function calculateYHeightForHierarchy(hierarchy: any, collapsedStore:Record<string,boolean>, nodeHeight: number) {
+function calculateYHeightForHierarchy(
+  hierarchy: any,
+  collapsedStore: Record<string, boolean>,
+  nodeHeight: number
+) {
   const yPositions: any = {};
 
   const flatTree = flattenHierarchy(hierarchy);
   let currentNodePosition = 0;
 
-  const allCollapsedNodes:any = {}
+  const allCollapsedNodes: any = {};
+  // console.log('all collapsed nodes', allCollapsedNodes)
+  
+  console.log("y calc store", collapsedStore)
+
+  function collapseChildren(nodeId) {
+    const children = flatTree.filter((currentNode) => currentNode.parentId == nodeId);
+    
+    if (!children) {
+      return
+    }
+    
+    children.forEach((child) => {
+      allCollapsedNodes[child.id] = true;
+      collapseChildren(child.id); 
+    });
+  }
 
   flatTree.forEach((node) => {
-    if(collapsedStore[node.id] || allCollapsedNodes[node.id]){
-      const children = flatTree.filter(currentNode=>currentNode.parentId == node.id)
-      children.forEach(child=>{
-        allCollapsedNodes[child.id] = true;
-      })
+    
+    // to potentially clean up and move this "propogate collapse" logic to setting toggles
+    // if node is collapsed, set all children to be collapsed. 
+    // if (collapsedStore[node.id] || allCollapsedNodes[node.id]) {
+    if (collapsedStore[node.id]) {
+      if (node.id !== 'topLevel') {
+        collapseChildren(node.id);
+      }
     }
     
-    if(!allCollapsedNodes[node.id]){ // based on parent
-      currentNodePosition += nodeHeight;
+
+    // console.log('all collapsed nodes', allCollapsedNodes)
+
+    // Issue: skipping over if a particular node is collapse, but some collapsed nodes are still visible
+    // ie the collapsed children of an uncollapsed node (ie "Question 8")
+    function findParentNode(parentId){
+      // console.log('nodeid to find',parentId,flatTree,flatTree.find(node=>node.id == parentId))
+      return flatTree.find(node=>node.id == parentId);
     }
-    
+
+    console.log('parent node', findParentNode(node.parentId), node.id, node.children);
+    let parentNode: any = findParentNode(node.parentId)
+    if (parentNode) {
+      if (collapsedStore[node.id] && parentNode.id == 'topLevel') {
+        // const children = flatTree.filter(
+        //   (currentNode) => currentNode.parentId == node.id
+        // );
+        console.log('collapsed store', collapsedStore)
+        currentNodePosition += nodeHeight;
+      }
+      else if (!allCollapsedNodes[node.id]) {
+        console.log('all collapsed nodes', allCollapsedNodes)
+        // console.log('collapsed store', collapsedStore)
+        // based on parent
+        // console.log('debug', parentNode, allCollapsedNodes[parentNode.id])
+        console.log('click debug', collapsedStore[node.id], parentNode.id)
+        currentNodePosition += nodeHeight;
+      }
+    }
     yPositions[node.id] = currentNodePosition;
   });
 
   return yPositions;
+
 }
 
 // functional component -> recurse through every child of the current node
 const NodeElementRecursive = (props: any) => {
   const nodeId = props.node.data.id;
   const yPositions = props.yPositions;
-  
+
   let { node, i, level, collapsedStore, setCollapsedStore, hoveredId } = props; // include toggleCollapse from props
   // Function to toggle collapsed state and reset counter
   const toggleCollapse = () => {
@@ -125,18 +203,19 @@ const NodeElementRecursive = (props: any) => {
     // console.log('clone', clone)
     clone[nodeId] = !clone[nodeId];
     setCollapsedStore(clone);
-    console.log('collapsed store', collapsedStore()) 
+    console.log("toggle collapsed store", collapsedStore());
   };
 
   return (
     <g>
       <g onClick={() => toggleCollapse()}>
-        <NodeElement {...props}   />
+        <NodeElement {...props} />
       </g>
 
       <Show
         when={node.children && !collapsedStore()?.[nodeId]}
-        fallback={<g></g>} >
+        fallback={<g></g>}
+      >
         <For each={node.children}>
           {(childNode, i) => {
             return (
@@ -181,7 +260,7 @@ const NodeElement = (props: any) => {
         height={40}
         fill="rgba(0, 0, 0, 0)"
       ></rect>
-        <text
+      <text
         x={xPosition + xTextOffset}
         y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
@@ -189,8 +268,16 @@ const NodeElement = (props: any) => {
         fill="black"
         font-family="Inter Tight Light"
       >
-        { !node.data.name.includes("Datum") ? (collapsedStore()?.[nodeId]  ? '▶ ' : '▼ ') : <g></g> } 
-        { node.data.name }
+        {!node.data.name.includes("Datum") ? (
+          collapsedStore()?.[nodeId] ? (
+            "▶ "
+          ) : (
+            "▼ "
+          )
+        ) : (
+          <g></g>
+        )}
+        {node.data.name}
       </text>
     </g>
   );

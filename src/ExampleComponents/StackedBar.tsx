@@ -73,7 +73,7 @@ const StackedBar: Component = () => {
   let vis: any;
 
   const [hierarchy, setHierarchy] = createSignal(false);
-  const [hoveredId, setHoveredId] = createSignal(null);
+  const [hoveredId, setHoveredId] = createSignal("0");
 
   onMount(async () => {
     //@ts-ignore
@@ -89,7 +89,7 @@ const StackedBar: Component = () => {
         console.log("in item data change");
         console.log("Item change changed. name:", name, "item:", item);
 
-        if (item != 0) {
+        if (item != "0") {
 
           // collapsed and grayed out if linked on 
           // reconstruct the nodeid from the cell item 
@@ -108,7 +108,7 @@ const StackedBar: Component = () => {
           // hover first, don't worry about click    
         }
         else {
-          setHoveredId(null);
+          setHoveredId("0");
         }
         console.log(hoveredId());
       }
@@ -135,7 +135,7 @@ const StackedBar: Component = () => {
       <div class={styles.container}>
       <div class={styles.scrollContainerChild}>
         <Show when={!!hierarchy()} fallback={<div>calculating hierarchy</div>}>
-          <TreeDiagram hierarchy={hierarchy} hoveredId={hoveredId()}></TreeDiagram>
+          <TreeDiagram hierarchy={hierarchy} hoveredId={hoveredId}></TreeDiagram>
         </Show>
       </div>
       <div class={styles.fixedContainerChild}
