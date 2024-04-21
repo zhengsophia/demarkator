@@ -6,12 +6,20 @@ import styles from "./App.module.css";
 let counter = 0;
 
 const TreeDiagram = (props: any) => {
-  const { hierarchy, hoveredId } = props;
+  // TODO:
+  // -- refactor hoveredId to collapseHoverId
+  // -- pass in setHighlightBounds as a prop
+  // == onHover for nodeElement to some function that gets the corresponding markData in that element
+  // optional: (recursive to get multiple bounds for a stack)
+  // -- in this function, setHighlightBounds
+  // then draw a rect over that in StackedBar when rendering the vis
 
-  // for each node have a state for "collapsed/not"
-  // mutate that state for the on click
-  // if node is collapsed, do not render any children elements
-  // when click is first made, also set counter to 0
+  const { hierarchy, collapseHoverId, setHighlightBounds } = props;
+
+  // -- for each node have a state for "collapsed/not"
+  // -- mutate that state for the on click
+  // -- if node is collapsed, do not render any children elements
+  // -- when click is first made, also set counter to 0
   if (!hierarchy) {
     return <div></div>;
   }
@@ -53,7 +61,7 @@ const TreeDiagram = (props: any) => {
 
   createEffect(() => {
 
-    if(hoveredId()=='0') {
+    if(collapseHoverId()=='0') {
       setCollapsedStore(defaultCollapsedStore);
       return;
     }
@@ -63,8 +71,8 @@ const TreeDiagram = (props: any) => {
     
     for (const key in previousCollapsedStore) {
       // TODO: update this hacky fix to rely less on the string value itself
-      if (hoveredId().includes(key)) {
-        console.log("in dont collapse");
+      if (collapseHoverId().includes(key)) {
+        // console.log("in dont collapse");
         hoveredCollapsedStore[key] = false;
       } else {
         hoveredCollapsedStore[key] = true;
@@ -76,7 +84,7 @@ const TreeDiagram = (props: any) => {
       setCollapsedStore(hoveredCollapsedStore);
     }
  
-    console.log('hovered collapse', hoveredCollapsedStore)
+    // console.log('hovered collapse', hoveredCollapsedStore)
   });
 
   createEffect(() => {
@@ -85,7 +93,7 @@ const TreeDiagram = (props: any) => {
       collapsedStore(),
       nodeHeight()
     );
-    console.log("new ypositions", newYPositions);
+    // console.log("new ypositions", newYPositions);
 
     setYPositions(newYPositions);
   });
@@ -105,7 +113,8 @@ const TreeDiagram = (props: any) => {
                 i={i}
                 level={0}
                 counter={counter}
-                hoveredId={hoveredId}
+                collapseHoverId={collapseHoverId}
+                setHighlightBounds={setHighlightBounds}
               />
             );
           }}
@@ -128,7 +137,7 @@ function calculateYHeightForHierarchy(
   const allCollapsedNodes: any = {};
   // console.log('all collapsed nodes', allCollapsedNodes)
   
-  console.log("y calc store", collapsedStore)
+  // console.log("y calc store", collapsedStore)
 
   function collapseChildren(nodeId) {
     const children = flatTree.filter((currentNode) => currentNode.parentId == nodeId);
@@ -155,8 +164,6 @@ function calculateYHeightForHierarchy(
     }
     
 
-    // console.log('all collapsed nodes', allCollapsedNodes)
-
     // Issue: skipping over if a particular node is collapse, but some collapsed nodes are still visible
     // ie the collapsed children of an uncollapsed node (ie "Question 8")
     function findParentNode(parentId){
@@ -164,7 +171,7 @@ function calculateYHeightForHierarchy(
       return flatTree.find(node=>node.id == parentId);
     }
 
-    console.log('parent node', findParentNode(node.parentId), node.id, node.children);
+    // console.log('parent node', findParentNode(node.parentId), node.id, node.children);
     let parentNode: any = findParentNode(node.parentId)
     if (parentNode) {
       if (!allCollapsedNodes[node.id]) {
@@ -177,6 +184,7 @@ function calculateYHeightForHierarchy(
       }
     }
     yPositions[node.id] = currentNodePosition;
+    console.log('hierarchy', hierarchy)
   });
 
   return yPositions;
@@ -188,20 +196,37 @@ const NodeElementRecursive = (props: any) => {
   const nodeId = props.node.data.id;
   const yPositions = props.yPositions;
 
-  let { node, i, level, collapsedStore, setCollapsedStore, hoveredId } = props; // include toggleCollapse from props
-  // Function to toggle collapsed state and reset counter
+  let { node, i, level, collapsedStore, setCollapsedStore, collapseHoverId, setHighlightBounds } = props; // include toggleCollapse from props
+  
+  // Function to toggle collapsed state
   const toggleCollapse = () => {
     // copies the collapsedStore
     const clone = Object.assign({}, collapsedStore());
     // console.log('clone', clone)
     clone[nodeId] = !clone[nodeId];
     setCollapsedStore(clone);
-    console.log("toggle collapsed store", collapsedStore());
+    // console.log("toggle collapsed store", collapsedStore());
   };
+
+  // Function to set highlight bounds
+  const updateHighlightBounds = () => {
+    // console.log('highlight data', node.data.allMarkData);
+    if (node.data.allMarkData) {
+      const bounds = node.data.allMarkData.bounds;
+      console.log('bounds', bounds);
+      setHighlightBounds(bounds);
+    }
+  };
+
 
   return (
     <g>
-      <g onClick={() => toggleCollapse()}>
+      <g onClick={() => toggleCollapse()} onMouseOver={() => updateHighlightBounds()} onMouseOut={() => setHighlightBounds({
+        x1: 0,
+        x2: 0,
+        y1: 0,
+        y2: 0,
+    })}>
         <NodeElement {...props} />
       </g>
 
@@ -220,7 +245,8 @@ const NodeElementRecursive = (props: any) => {
                 collapsedStore={collapsedStore}
                 setCollapsedStore={setCollapsedStore}
                 yPositions={yPositions}
-                hoveredId={hoveredId}
+                collapseHoverId={collapseHoverId}
+                setHighlightBounds={setHighlightBounds}
               />
             );
           }}
@@ -232,10 +258,10 @@ const NodeElementRecursive = (props: any) => {
 
 // presentational component -> generate the rectangles based on its properties
 const NodeElement = (props: any) => {
-  const { node, level, yPositions, collapsedStore, hoveredId } = props;
+  const { node, level, yPositions, collapsedStore } = props;
   const nodeId = props.node.data.id;
 
-  // console.log(hoveredId);
+  // console.log(collapseHoverId);
 
   const levelOffset = level * 30;
   const xPosition = 20 + levelOffset;

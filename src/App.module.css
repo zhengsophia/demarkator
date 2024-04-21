@@ -41,6 +41,29 @@
 
 .fixedContainerChild {
   flex: 1;
+  position: relative;
+  width: 472px;
+  height: 210px;
+}
+
+.svgVis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  display: block
+}
+
+.svgOverlay {
+  position: absolute;
+  top: 5px;
+  left: 85px;
+  width: 100%; 
+  height: 100%; 
+  z-index: 1;
+  pointer-events: none;
+  display: block
 }
 
 
