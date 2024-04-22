@@ -284,7 +284,7 @@ const NodeElement = (props: any) => {
         y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
         alignment-baseline={"bottom"}
-        fill="black"
+        fill={collapsedStore()?.[nodeId] ? "#D3D3D3" : "black"}
         font-family="Inter Tight Light"
       >
         {!node.data.name.includes("Datum") ? (
