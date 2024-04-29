@@ -42,7 +42,7 @@ const TreeDiagram = (props: any) => {
   const [collapsedStore, setCollapsedStore] = createSignal(
     defaultCollapsedStore
   );
-  const [nodeHeight, setNodeHeight] = createSignal(50);
+  const [nodeHeight, setNodeHeight] = createSignal(30);
   const [yPositions, setYPositions] = createSignal(null);
 
   function isObjectEqual(obj1, obj2) {
@@ -100,7 +100,7 @@ const TreeDiagram = (props: any) => {
 
   return (
     <Show when={yPositions()} fallback={<div></div>}>
-      <svg width={500} height={8000}>
+      <svg width={300} height={2800}>
         <For each={hierarchy()?.children}>
           {(node, i) => {
             return (
@@ -263,7 +263,7 @@ const NodeElement = (props: any) => {
 
   // console.log(collapseHoverId);
 
-  const levelOffset = level * 30;
+  const levelOffset = level * 20;
   const xPosition = 20 + levelOffset;
   const xTextOffset = 5;
   const rectWidth = 300 - levelOffset;
@@ -276,7 +276,7 @@ const NodeElement = (props: any) => {
         x={xPosition}
         y={yPositions()[node.data.id]}
         width={rectWidth}
-        height={40}
+        height={30}
         fill="rgba(0, 0, 0, 0)"
       ></rect>
       <text
@@ -284,6 +284,7 @@ const NodeElement = (props: any) => {
         y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
         alignment-baseline={"bottom"}
+        font-size="16px"
         fill={collapsedStore()?.[nodeId] ? "#D3D3D3" : "black"}
         font-family="Inter Tight Light"
       >
