@@ -42,7 +42,7 @@ const TreeDiagram = (props: any) => {
   const [collapsedStore, setCollapsedStore] = createSignal(
     defaultCollapsedStore
   );
-  const [nodeHeight, setNodeHeight] = createSignal(30);
+  const [nodeHeight, setNodeHeight] = createSignal(15);
   const [yPositions, setYPositions] = createSignal(null);
 
   function isObjectEqual(obj1, obj2) {
@@ -284,7 +284,7 @@ const NodeElement = (props: any) => {
         y={yPositions()[node.data.id] + yTextOffset}
         text-anchor="start"
         alignment-baseline={"bottom"}
-        font-size="16px"
+        font-size="11px"
         fill={collapsedStore()?.[nodeId] ? "#D3D3D3" : "black"}
         font-family="Inter Tight Light"
       >
