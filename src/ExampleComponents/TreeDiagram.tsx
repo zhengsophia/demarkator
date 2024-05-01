@@ -42,6 +42,9 @@ const TreeDiagram = (props: any) => {
   const [collapsedStore, setCollapsedStore] = createSignal(
     defaultCollapsedStore
   );
+  const [hoveredStore, setHoveredStore] = createSignal(
+    defaultCollapsedStore
+  );
   const [nodeHeight, setNodeHeight] = createSignal(15);
   const [yPositions, setYPositions] = createSignal(null);
 
@@ -62,26 +65,30 @@ const TreeDiagram = (props: any) => {
   createEffect(() => {
 
     if(collapseHoverId()=='0') {
-      setCollapsedStore(defaultCollapsedStore);
+      setHoveredStore(defaultCollapsedStore);
       return;
     }
 
-    const hoveredCollapsedStore = {};
-    const previousCollapsedStore = collapsedStore();
+    // Should I reset it each time?
+    // Do we want it to be more bidirectional?
+    setCollapsedStore(defaultCollapsedStore);
+
+    const newHoveredStore = {};
+    const previousHoveredStore = hoveredStore();
     
-    for (const key in previousCollapsedStore) {
+    for (const key in previousHoveredStore) {
       // TODO: update this hacky fix to rely less on the string value itself
       if (collapseHoverId().includes(key)) {
         // console.log("in dont collapse");
-        hoveredCollapsedStore[key] = false;
+        newHoveredStore[key] = true;
       } else {
-        hoveredCollapsedStore[key] = true;
+        newHoveredStore[key] = false;
       }
     }
 
     // do a deep equality check between hoveredCollapsedStore,collapsedStore()
-    if (!isObjectEqual(previousCollapsedStore, hoveredCollapsedStore)) {
-      setCollapsedStore(hoveredCollapsedStore);
+    if (!isObjectEqual(previousHoveredStore, newHoveredStore)) {
+      setHoveredStore(newHoveredStore);
     }
  
     // console.log('hovered collapse', hoveredCollapsedStore)
@@ -100,7 +107,7 @@ const TreeDiagram = (props: any) => {
 
   return (
     <Show when={yPositions()} fallback={<div></div>}>
-      <svg width={300} height={2800}>
+      <svg width={300} height={1400}>
         <For each={hierarchy()?.children}>
           {(node, i) => {
             return (
@@ -115,6 +122,7 @@ const TreeDiagram = (props: any) => {
                 counter={counter}
                 collapseHoverId={collapseHoverId}
                 setHighlightBounds={setHighlightBounds}
+                hoveredStore={hoveredStore}
               />
             );
           }}
@@ -196,14 +204,16 @@ const NodeElementRecursive = (props: any) => {
   const nodeId = props.node.data.id;
   const yPositions = props.yPositions;
 
-  let { node, i, level, collapsedStore, setCollapsedStore, collapseHoverId, setHighlightBounds } = props; // include toggleCollapse from props
+  let { node, i, level, collapsedStore, setCollapsedStore, collapseHoverId, setHighlightBounds, hoveredStore } = props; // include toggleCollapse from props
   
   // Function to toggle collapsed state
   const toggleCollapse = () => {
     // copies the collapsedStore
     const clone = Object.assign({}, collapsedStore());
     // console.log('clone', clone)
-    clone[nodeId] = !clone[nodeId];
+    if (!nodeId.includes("datum")) {
+      clone[nodeId] = !clone[nodeId];
+    }
     setCollapsedStore(clone);
     // console.log("toggle collapsed store", collapsedStore());
   };
@@ -247,6 +257,7 @@ const NodeElementRecursive = (props: any) => {
                 yPositions={yPositions}
                 collapseHoverId={collapseHoverId}
                 setHighlightBounds={setHighlightBounds}
+                hoveredStore={hoveredStore}
               />
             );
           }}
@@ -258,7 +269,7 @@ const NodeElementRecursive = (props: any) => {
 
 // presentational component -> generate the rectangles based on its properties
 const NodeElement = (props: any) => {
-  const { node, level, yPositions, collapsedStore } = props;
+  const { node, level, yPositions, collapsedStore, hoveredStore } = props;
   const nodeId = props.node.data.id;
 
   // console.log(collapseHoverId);
@@ -266,7 +277,7 @@ const NodeElement = (props: any) => {
   const levelOffset = level * 20;
   const xPosition = 20 + levelOffset;
   const xTextOffset = 5;
-  const rectWidth = 300 - levelOffset;
+  const rectWidth = 200 - levelOffset;
   const yIncrement = 80;
   const yTextOffset = yIncrement / 3;
 
@@ -274,10 +285,12 @@ const NodeElement = (props: any) => {
     <g id={nodeId}>
       <rect
         x={xPosition}
-        y={yPositions()[node.data.id]}
+        y={yPositions()[node.data.id] + 15}
         width={rectWidth}
-        height={30}
+        height={15}
         fill="rgba(0, 0, 0, 0)"
+        stroke={hoveredStore()?.[nodeId] ? "#000000" : "none"} 
+        stroke-width={hoveredStore()?.[nodeId] ? "2" : "0"} 
       ></rect>
       <text
         x={xPosition + xTextOffset}

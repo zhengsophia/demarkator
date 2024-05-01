@@ -37,6 +37,7 @@
   height: 80vh; 
   overflow-y: auto;
   overflow-x: hidden;
+  text-align: right;
 }
 
 .fixedContainerChild {
