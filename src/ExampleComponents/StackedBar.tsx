@@ -97,7 +97,6 @@ const StackedBar: Component = () => {
                     // collapsed and grayed out if linked on
                     // -- reconstruct the nodeid from the cell item
                     // -- item will contain all node's data
-
                     // -- checking datum item and against which node data id's it matches
                     let question = item.datum.question;
                     let type = item.datum.type;
@@ -160,7 +159,7 @@ const StackedBar: Component = () => {
                                   width={highlightBounds().x2 - highlightBounds().x1}
                                   fill="none"
                                   stroke="black" 
-                                  stroke-width="2"
+                                  stroke-width="1"
                               ></rect>
                         </svg>
                 </div>

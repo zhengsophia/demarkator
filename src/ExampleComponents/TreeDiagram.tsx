@@ -9,7 +9,7 @@ const TreeDiagram = (props: any) => {
   // TODO:
   // -- refactor hoveredId to collapseHoverId
   // -- pass in setHighlightBounds as a prop
-  // == onHover for nodeElement to some function that gets the corresponding markData in that element
+  // -- onHover for nodeElement to some function that gets the corresponding markData in that element
   // optional: (recursive to get multiple bounds for a stack)
   // -- in this function, setHighlightBounds
   // then draw a rect over that in StackedBar when rendering the vis
@@ -69,8 +69,6 @@ const TreeDiagram = (props: any) => {
       return;
     }
 
-    // Should I reset it each time?
-    // Do we want it to be more bidirectional?
     setCollapsedStore(defaultCollapsedStore);
 
     const newHoveredStore = {};
@@ -78,8 +76,8 @@ const TreeDiagram = (props: any) => {
     
     for (const key in previousHoveredStore) {
       // TODO: update this hacky fix to rely less on the string value itself
-      if (collapseHoverId().includes(key)) {
-        // console.log("in dont collapse");
+      // if (collapseHoverId().includes(key)) {
+      if (collapseHoverId() == key) {
         newHoveredStore[key] = true;
       } else {
         newHoveredStore[key] = false;
@@ -90,8 +88,13 @@ const TreeDiagram = (props: any) => {
     if (!isObjectEqual(previousHoveredStore, newHoveredStore)) {
       setHoveredStore(newHoveredStore);
     }
- 
-    // console.log('hovered collapse', hoveredCollapsedStore)
+
+    // if (node.data.allMarkData) {
+    //   const bounds = node.data.allMarkData.bounds;
+    //   console.log('bounds', bounds);
+    //   setHighlightBounds(bounds);
+    // }
+
   });
 
   createEffect(() => {
@@ -206,6 +209,18 @@ const NodeElementRecursive = (props: any) => {
 
   let { node, i, level, collapsedStore, setCollapsedStore, collapseHoverId, setHighlightBounds, hoveredStore } = props; // include toggleCollapse from props
   
+  // if a rect on the svg is currently being hovered over, highlight the bounds
+  createEffect(() => {
+    if (nodeId == collapseHoverId()) {
+      console.log('bidirection', nodeId, collapseHoverId())
+      if (node.data.allMarkData) {
+        const bounds = node.data.allMarkData.bounds;
+        console.log('hover bounds', bounds);
+        setHighlightBounds(bounds);
+      }
+    }
+  });
+
   // Function to toggle collapsed state
   const toggleCollapse = () => {
     // copies the collapsedStore
@@ -271,6 +286,7 @@ const NodeElementRecursive = (props: any) => {
 const NodeElement = (props: any) => {
   const { node, level, yPositions, collapsedStore, hoveredStore } = props;
   const nodeId = props.node.data.id;
+  const [isHovered, setIsHovered] = createSignal(false);
 
   // console.log(collapseHoverId);
 
@@ -289,8 +305,10 @@ const NodeElement = (props: any) => {
         width={rectWidth}
         height={15}
         fill="rgba(0, 0, 0, 0)"
-        stroke={hoveredStore()?.[nodeId] ? "#000000" : "none"} 
-        stroke-width={hoveredStore()?.[nodeId] ? "2" : "0"} 
+        stroke={(hoveredStore()?.[nodeId] || isHovered()) ? "#000000" : "none"} 
+        stroke-width={(hoveredStore()?.[nodeId] || isHovered()) ? "1" : "0"} 
+        onmouseover={() => setIsHovered(true)}
+        onmouseout={() => setIsHovered(false)}
       ></rect>
       <text
         x={xPosition + xTextOffset}
@@ -300,6 +318,8 @@ const NodeElement = (props: any) => {
         font-size="11px"
         fill={collapsedStore()?.[nodeId] ? "#D3D3D3" : "black"}
         font-family="Inter Tight Light"
+        onmouseover={() => setIsHovered(true)}
+        onmouseout={() => setIsHovered(false)}
       >
         {!node.data.name.includes("Datum") ? (
           collapsedStore()?.[nodeId] ? (
