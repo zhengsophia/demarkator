@@ -27,24 +27,28 @@
 .container {
   display: flex;
   justify-content: center;
-  align-items: center; 
-  width: 100%; 
-  height: 80vh; 
+  align-items: center;
+  width: 100%;
+  height: 100vh;
 }
 
 .scrollContainerChild {
   flex: 1;
-  height: 80vh; 
+  max-width: 800px; 
+  height: 40vh;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   text-align: right;
+  box-sizing: border-box;
+  padding: 10px;
 }
 
 .fixedContainerChild {
   flex: 1;
   position: relative;
   width: 800px;
-  height: 210px;
+  height: 40vh;
+  margin-left: 20px; 
 }
 
 .svgVis {
