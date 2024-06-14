@@ -1,7 +1,6 @@
-import { HierarchyNode } from "d3-hierarchy";
 import { For, Show, createSignal, createEffect } from "solid-js";
 import { flattenHierarchy } from "./utils";
-import styles from "./App.module.css";
+import styles from "../App.module.css";
 
 let counter = 0;
 

@@ -6,6 +6,7 @@ import styles from "../App.module.css";
 import spec from "./StackedBar.json";
 import { stratify } from "d3-hierarchy";
 import TreeDiagram from "./TreeDiagram";
+import Datatable from "./Datatable";
 
 function processStackedBarDataMarks(data: any) {
     const internalDataModel = [];
@@ -72,6 +73,7 @@ const StackedBar: Component = () => {
     let vis: any;
 
     const [hierarchy, setHierarchy] = createSignal(false);
+    const [originalData, setOriginalData] = createSignal(false);
     const [collapseHoverId, setCollapseHoverId] = createSignal("0");
     const [highlightBounds, setHighlightBounds] = createSignal({
         x1: 0,
@@ -88,6 +90,7 @@ const StackedBar: Component = () => {
             const data = embedResult.view.data("marks");
 
             console.log("mark data", data);
+            setOriginalData(data);
 
             function onItemDataChange(name: any, item: any) {
                 console.log("in item data change");
@@ -126,7 +129,7 @@ const StackedBar: Component = () => {
             embedResult.view.runAsync();
             console.log("init cell", embedResult.view.signal("cell"));
 
-            //@ts-ignore
+            // @ts-ignore
             setHierarchy(processStackedBarDataMarks(data));
             
         });
@@ -140,11 +143,10 @@ const StackedBar: Component = () => {
                         when={!!hierarchy()}
                         fallback={<div>calculating hierarchy</div>}
                     >
-                        <TreeDiagram
-                            hierarchy={hierarchy}
-                            collapseHoverId={collapseHoverId}
-                            setHighlightBounds={setHighlightBounds}
-                        ></TreeDiagram>
+                    <Datatable
+                        originalData={originalData}
+                        hierarchy={hierarchy}
+                        setHighlightBounds={setHighlightBounds}></Datatable>
                     </Show>
                 </div>
 
