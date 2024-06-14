@@ -219,6 +219,14 @@ const NodeElementRecursive = (props: any) => {
         setHighlightBounds(bounds);
       }
     }
+    
+    if (collapseHoverId() == 0) {
+      setHighlightBounds({
+        x1: 0,
+        x2: 0,
+        y1: 0,
+        y2: 0});
+    }
   });
 
   // Function to toggle collapsed state

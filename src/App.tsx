@@ -17,9 +17,9 @@ const App: Component = () => {
   return (
     <div class={styles.App}>
       <header class={styles.header}>
-        {/* <StackedBar></StackedBar> */}
+        <StackedBar></StackedBar>
         {/* <LineChart></LineChart> */}
-        <Scatterplot></Scatterplot>
+        {/* <Scatterplot></Scatterplot> */}
       </header>
     </div>
   );
