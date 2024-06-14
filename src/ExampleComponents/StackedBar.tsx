@@ -165,7 +165,7 @@ const StackedBar: Component = () => {
                               ></rect>
                         </svg>
                 </div>
-
+                
 
             </div>
         </div>

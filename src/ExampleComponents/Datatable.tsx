@@ -1,8 +1,10 @@
-import { For, Show, createSignal, createEffect } from "solid-js";
+import { For, createSignal } from "solid-js";
 import styles from "../App.module.css";
 
 const Datatable = (props: any) => {
   const { originalData, hierarchy, setHighlightBounds } = props;
+
+  const [highlightDatum, setHighlightDatum] = createSignal(null);
 
   console.log('testing data', originalData())
 
@@ -19,6 +21,22 @@ const Datatable = (props: any) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  function handleMouseEnter(event: MouseEvent, item: any, index: number) {
+    setHighlightDatum(index);
+    console.log('hover bounds', item.bounds);
+    setHighlightBounds(item.bounds);
+  }
+
+  function handleMouseLeave() {
+    setHighlightDatum(null);
+    setHighlightBounds(setHighlightBounds({
+      x1: 0,
+      x2: 0,
+      y1: 0,
+      y2: 0,
+  }));
+  }
+
   function renderTable(data: any, fields: any) {
     return (
       <table class={styles.datatable}>
@@ -30,8 +48,12 @@ const Datatable = (props: any) => {
           </tr>
         </thead>
         <tbody>
-          <For each={data}>{item => (
-            <tr>
+          <For each={data}>{(item, index) => (
+            <tr
+              class={highlightDatum() === index() ? styles.highlight : ""}
+              onMouseEnter={(event) => handleMouseEnter(event, item, index())}
+              onMouseLeave={handleMouseLeave}
+            >
               <For each={fields}>{field => (
                 <td>{item.datum[field]}</td>
               )}</For>
@@ -48,5 +70,6 @@ const Datatable = (props: any) => {
     </div>
   );
 };
+
 
 export default Datatable;
