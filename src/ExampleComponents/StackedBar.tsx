@@ -75,6 +75,7 @@ const StackedBar: Component = () => {
     const [hierarchy, setHierarchy] = createSignal(false);
     const [originalData, setOriginalData] = createSignal(false);
     const [collapseHoverId, setCollapseHoverId] = createSignal("0");
+    const [highlightedRow, setHighlightedRow] = createSignal(null);
     const [highlightBounds, setHighlightBounds] = createSignal({
         x1: 0,
         x2: 0,
@@ -97,28 +98,28 @@ const StackedBar: Component = () => {
                 console.log("Item change changed. name:", name, "item:", item);
 
                 if (item != "0") {
-                    // collapsed and grayed out if linked on
-                    // -- reconstruct the nodeid from the cell item
-                    // -- item will contain all node's data
-                    // -- checking datum item and against which node data id's it matches
                     let question = item.datum.question;
                     let type = item.datum.type;
                     let itemId =
                         question.toString() + "-" + type.toString() + "-datum";
                     setCollapseHoverId(itemId);
-
-                    // -- check if there is a match with ids, then when there's a match,
-                    // collapse all others and gray others out
-                    // -- delegate checking logic inside TreeDiagram -> what's impt to transfer
-                    // -- use signals to pass item() outside the scope of this function for currently hovered model
-                    // hover first, don't worry about click
-                } else {
+                    setHighlightBounds(item.bounds); 
+                    setHighlightedRow(item.datum); 
+                } 
+                
+                else {
                     setCollapseHoverId("0");
+                    setHighlightBounds({
+                        x1: 0,
+                        x2: 0,
+                        y1: 0,
+                        y2: 0,
+                    });
+                    setHighlightedRow(null); 
                 }
                 console.log(collapseHoverId());
             }
 
-            // Assuming your Vega view instance is stored in a variable named `view`
             const newResult = embedResult.view.addSignalListener(
                 "cell",
                 onItemDataChange
@@ -146,7 +147,8 @@ const StackedBar: Component = () => {
                     <Datatable
                         originalData={originalData}
                         hierarchy={hierarchy}
-                        setHighlightBounds={setHighlightBounds}></Datatable>
+                        setHighlightBounds={setHighlightBounds}
+                        highlightedRow={highlightedRow}></Datatable>
                     </Show>
                 </div>
 

@@ -1,8 +1,8 @@
-import { For, createSignal } from "solid-js";
+import { For, createSignal, createEffect } from "solid-js";
 import styles from "../App.module.css";
 
 const Datatable = (props: any) => {
-  const { originalData, hierarchy, setHighlightBounds } = props;
+  const { originalData, hierarchy, setHighlightBounds, highlightedRow } = props;
 
   const [highlightDatum, setHighlightDatum] = createSignal(null);
 
@@ -49,11 +49,12 @@ const Datatable = (props: any) => {
         </thead>
         <tbody>
           <For each={data}>{(item, index) => (
-            <tr
-              class={highlightDatum() === index() ? styles.highlight : ""}
+            <tr class={
+                  highlightDatum() === index() ||
+                  (highlightedRow() && highlightedRow().question === item.datum.question &&
+                      highlightedRow().type === item.datum.type) ? styles.highlight : ""}
               onMouseEnter={(event) => handleMouseEnter(event, item, index())}
-              onMouseLeave={handleMouseLeave}
-            >
+              onMouseLeave={handleMouseLeave}>
               <For each={fields}>{field => (
                 <td>{item.datum[field]}</td>
               )}</For>
