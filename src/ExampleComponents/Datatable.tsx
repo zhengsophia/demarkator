@@ -13,6 +13,7 @@ const Datatable = (props: any) => {
   }
 
   let fields: string[] = ["question", "type", "value", "percentage"];
+  // let fields: string[] = ["Species", "Flipper Length (mm)", "Body Mass (g)"];
 
   console.log('testing hie', hierarchy())
 

@@ -6,6 +6,7 @@ import styles from "../App.module.css";
 import spec from "./Scatterplot.json";
 import { stratify } from "d3-hierarchy";
 import TreeDiagram from "./TreeDiagram";
+import Datatable from "./Datatable";
 
 function processScatterplotDataMarks(data: any) {
     const internalDataModel = [];
@@ -13,38 +14,47 @@ function processScatterplotDataMarks(data: any) {
 
     internalDataModel.push({ id: topLevelID });
 
-    console.log("mark data", data);
-
-    console.log('test', data[0].datum)
-
     // process mark data into a tree model
     // TODO: make not reliant on the string spec itself
-    let species = data[0].datum.Species;
-    let bodyMass = data[0].datum["Body Mass (g)"];
-    let flipperLength = data[0].datum["Flipper Length (mm)"];
+    let question = data[0].datum.question;
+    let type = data[0].datum.type;
+
+    console.log("mark data", data);
 
     for (let i = 0; i < data.length; i++) {
         let datum = data[i].datum;
 
-        if (species != datum.Species || i == 0) {
-            species = datum.Species;
+        if (question != datum.question || i == 0) {
+            question = datum.question;
 
             const node = {
-                name: "Species: " + species.toString(),
-                id: species.toString(),
+                name: "Stack: " + question.toString(),
+                id: question.toString(),
                 parentId: topLevelID,
             };
 
             internalDataModel.push(node);
         }
 
+        if (type != datum.type || i == 0) {
+            type = datum.type;
+
+            const node = {
+                name: "Bar: " + type.toString(),
+                id: question.toString() + "-" + type.toString(),
+                parentId: question.toString(),
+            };
+
+            internalDataModel.push(node);
+        }
+
         const datumName =
-            "Datum " + (i + 1).toString() + ": " + "Body Mass (g): " + data[i].datum["Body Mass (g)"] + ", Flipper Length (mm): " + data[i].datum["Flipper Length (mm)"];
-        const parentName = species.toString();
+            "Datum " + (i + 1).toString() + ": " + datum.percentage.toString();
+        const parentName = question.toString() + "-" + type.toString();
 
         const node = {
             name: datumName,
-            id: datumName,
+            id: parentName + "-datum",
             parentId: parentName,
             nodeData: datum,
             allMarkData: data[i],
@@ -63,7 +73,9 @@ const Scatterplot: Component = () => {
     let vis: any;
 
     const [hierarchy, setHierarchy] = createSignal(false);
+    const [originalData, setOriginalData] = createSignal(false);
     const [collapseHoverId, setCollapseHoverId] = createSignal("0");
+    const [highlightedRow, setHighlightedRow] = createSignal(null);
     const [highlightBounds, setHighlightBounds] = createSignal({
         x1: 0,
         x2: 0,
@@ -79,45 +91,46 @@ const Scatterplot: Component = () => {
             const data = embedResult.view.data("marks");
 
             console.log("mark data", data);
+            setOriginalData(data);
 
-            // function onItemDataChange(name: any, item: any) {
-            //     console.log("in item data change");
-            //     console.log("Item change changed. name:", name, "item:", item);
+            function onItemDataChange(name: any, item: any) {
+                console.log("in item data change");
+                console.log("Item change changed. name:", name, "item:", item);
 
-            //     if (item != "0") {
-            //         // collapsed and grayed out if linked on
-            //         // -- reconstruct the nodeid from the cell item
-            //         // -- item will contain all node's data
-            //         // -- checking datum item and against which node data id's it matches
-            //         let question = item.datum.question;
-            //         let type = item.datum.type;
-            //         let itemId =
-            //             question.toString() + "-" + type.toString() + "-datum";
-            //         setCollapseHoverId(itemId);
+                if (item != "0") {
+                    let question = item.datum.question;
+                    let type = item.datum.type;
+                    let itemId =
+                        question.toString() + "-" + type.toString() + "-datum";
+                    setCollapseHoverId(itemId);
+                    setHighlightBounds(item.bounds); 
+                    setHighlightedRow(item.datum); 
+                } 
+                
+                else {
+                    setCollapseHoverId("0");
+                    setHighlightBounds({
+                        x1: 0,
+                        x2: 0,
+                        y1: 0,
+                        y2: 0,
+                    });
+                    setHighlightedRow(null); 
+                }
+                console.log(collapseHoverId());
+            }
 
-            //         // -- check if there is a match with ids, then when there's a match,
-            //         // collapse all others and gray others out
-            //         // -- delegate checking logic inside TreeDiagram -> what's impt to transfer
-            //         // -- use signals to pass item() outside the scope of this function for currently hovered model
-            //         // hover first, don't worry about click
-            //     } else {
-            //         setCollapseHoverId("0");
-            //     }
-            //     console.log(collapseHoverId());
-            // }
+            const newResult = embedResult.view.addSignalListener(
+                "cell",
+                onItemDataChange
+            );
 
-            // // Assuming your Vega view instance is stored in a variable named `view`
-            // const newResult = embedResult.view.addSignalListener(
-            //     "cell",
-            //     onItemDataChange
-            // );
+            console.log("signal listener", newResult);
 
-            // console.log("signal listener", newResult);
+            embedResult.view.runAsync();
+            console.log("init cell", embedResult.view.signal("cell"));
 
-            // embedResult.view.runAsync();
-            // console.log("init cell", embedResult.view.signal("cell"));
-
-            //@ts-ignore
+            // @ts-ignore
             setHierarchy(processScatterplotDataMarks(data));
             
         });
@@ -131,11 +144,11 @@ const Scatterplot: Component = () => {
                         when={!!hierarchy()}
                         fallback={<div>calculating hierarchy</div>}
                     >
-                        <TreeDiagram
-                            hierarchy={hierarchy}
-                            collapseHoverId={collapseHoverId}
-                            setHighlightBounds={setHighlightBounds}
-                        ></TreeDiagram>
+                    <Datatable
+                        originalData={originalData}
+                        hierarchy={hierarchy}
+                        setHighlightBounds={setHighlightBounds}
+                        highlightedRow={highlightedRow}></Datatable>
                     </Show>
                 </div>
 
@@ -154,7 +167,7 @@ const Scatterplot: Component = () => {
                               ></rect>
                         </svg>
                 </div>
-
+                
 
             </div>
         </div>
